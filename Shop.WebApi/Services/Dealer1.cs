@@ -11,7 +11,7 @@ namespace Shop.WebApi.Services
 
         public Dealer1()
         {
-            _supplierUrl = ConfigurationManager.AppSettings["Dealer2Url"];
+            //_supplierUrl = ConfigurationManager.AppSettings["Dealer2Url"];
         }
 
         public bool ArticleInInventory(int id)

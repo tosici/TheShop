@@ -1,11 +1,12 @@
-﻿using System;
-using System.Web.Http;
+﻿using Microsoft.AspNetCore.Mvc;
 using Shop.WebApi.Models;
 using Shop.WebApi.Services;
 
 namespace Shop.WebApi.Controllers
 {
-    public class ShopController : ApiController
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ShopController : Controller
     {
         private Db Db;
         private Logger logger;
@@ -25,11 +26,14 @@ namespace Shop.WebApi.Controllers
             Dealer2 = new Dealer2();
         }
 
-        [HttpGet()]
-        public Article GetArtice(int id, int maxExpectedPrice = 200)
+
+
+
+        [HttpGet("GetArticle/{id}/{maxExpectedPrice}")]
+        public ActionResult<Article> GetArticle(int id, int maxExpectedPrice = 200)
         {
-            Article article = null;
-            Article tmp = null;
+            Article? article = null;
+            Article? tmp = null;
             var articleExists = CachedSupplier.ArticleInInventory(id);
             if (articleExists)
             {
@@ -66,21 +70,24 @@ namespace Shop.WebApi.Controllers
                         CachedSupplier.SetArticle(article);
                     }
                 }
+                else
+                {
+                    return NotFound();
+                }
             }
 
             return article;
         }
 
-        [HttpPost]
-        public void BuyArticle(Article article, int buyerId)
+        [HttpPost("{buyerId}")]
+        public  ActionResult<Article> BuyArticle([FromBody] Article article, int buyerId)
         {
-            var id = article.ID;
             if (article == null)
             {
-                throw new Exception("Could not order article");
+                return UnprocessableEntity();
             }
 
-            logger.Debug("Trying to sell article with id=" + id);
+            logger.Debug($"Trying to sell article with id="+article.ID.ToString());
 
             article.IsSold = true;
             article.SoldDate = DateTime.Now;
@@ -89,16 +96,19 @@ namespace Shop.WebApi.Controllers
             try
             {
                 Db.Save(article);
-                logger.Info("Article with id " + id + " is sold.");
+                logger.Info($"Article with id {article.ID} is sold.");
+                return article;
             }
             catch (ArgumentNullException ex)
             {
-                logger.Error("Could not save article with id " + id);
+                logger.Error("Could not save article with id " + article.ID.ToString());
                 throw new Exception("Could not save article with id");
             }
             catch (Exception)
             {
+                return BadRequest(article);
             }
         }
+
     }
 }

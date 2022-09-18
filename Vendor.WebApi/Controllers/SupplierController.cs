@@ -1,11 +1,12 @@
-﻿using System;
-using System.Web.Http;
+﻿using Microsoft.AspNetCore.Mvc;
 using Vendor.WebApi.Models;
 using Vendor.WebApi.Services;
 
 namespace Vendor.WebApi.Controllers
 {
-    public class SupplierController : ApiController
+    [Route("api/[controller]")]
+    [ApiController]
+    public class SupplierController : Controller
     {
         private DatabaseDriver DatabaseDriver;
         private Logger logger;
@@ -19,12 +20,14 @@ namespace Vendor.WebApi.Controllers
             _supplierService = new SupplierService();
         }
 
-        public bool ArticleInInventory(int id)
+        [HttpGet("ArticleInInventory/{id}")]
+        public ActionResult<bool> ArticleInInventory(int id)
         {
             return _supplierService.ArticleInInventory(id);
         }
 
-        public Article GetArtice(int id)
+        [HttpGet("GetArticle/{id}")]
+        public ActionResult<Article> GetArticle(int id)
         {
             var articleExists = _supplierService.ArticleInInventory(id);
             if (articleExists)
@@ -33,16 +36,17 @@ namespace Vendor.WebApi.Controllers
             }
             else
             {
-                throw new Exception("Article does not exist.");
+                return NotFound();
             }
         }
 
-        public void BuyArticle(Article article, int buyerId)
+        [HttpPost("{buyerId}")]
+        public ActionResult<Article> BuyArticle([FromBody]Article article, int buyerId)
         {
             var id = article.ID;
             if (article == null)
             {
-                throw new Exception("Could not order article");
+                return UnprocessableEntity();
             }
 
             logger.Debug("Trying to sell article with id=" + id);
@@ -55,6 +59,7 @@ namespace Vendor.WebApi.Controllers
             {
                 DatabaseDriver.Save(article);
                 logger.Info("Article with id=" + id + " is sold.");
+                return article;
             }
             catch (ArgumentNullException ex)
             {
@@ -63,7 +68,9 @@ namespace Vendor.WebApi.Controllers
             }
             catch (Exception)
             {
+                return BadRequest();
             }
         }
     }
 }
+
