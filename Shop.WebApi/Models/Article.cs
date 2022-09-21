@@ -7,6 +7,11 @@ namespace Shop.WebApi.Models
 {
     public class Article
     {
+        public Article()
+        {
+            ID = 0;
+            Name_of_article = "Name";
+        }
         public int ID { get; set; }
 
         public string Name_of_article { get; set; }
@@ -16,5 +21,6 @@ namespace Shop.WebApi.Models
 
         public DateTime SoldDate { get; set; }
         public int BuyerUserId { get; set; }
+        public int DealerId { get; set; }
     }
 }

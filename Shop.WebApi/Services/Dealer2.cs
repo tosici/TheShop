@@ -1,11 +1,10 @@
-﻿using System.Configuration;
-using System.Net.Http;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using Shop.WebApi.Interfaces;
 using Shop.WebApi.Models;
 
 namespace Shop.WebApi.Services
 {
-    public class Dealer2
+    public class Dealer2 :IDealer
     {
         private readonly string _supplierUrl;
 
@@ -23,6 +22,11 @@ namespace Shop.WebApi.Services
 
                 return hasArticle;
             }
+        }
+
+        public Article BuyArticle(Article article)
+        {
+            throw new NotImplementedException();
         }
 
         public Article GetArticle(int id)

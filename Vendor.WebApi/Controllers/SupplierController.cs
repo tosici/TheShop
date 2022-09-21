@@ -29,6 +29,9 @@ namespace Vendor.WebApi.Controllers
         [HttpGet("GetArticle/{id}")]
         public ActionResult<Article> GetArticle(int id)
         {
+
+            var sd = new ServiceReferencePay.PaymentServiceSoapClient(ServiceReferencePay.PaymentServiceSoapClient.EndpointConfiguration.PaymentServiceSoap12);
+            var res = sd.GetAllFileTypes(new ServiceReferencePay.GetAllFileTypesRequest(new ServiceReferencePay.CallContext()));
             var articleExists = _supplierService.ArticleInInventory(id);
             if (articleExists)
             {
