@@ -12,7 +12,7 @@ namespace Shop.WebApi.DatabaseLayer
         public Db()
         {
             //mock for testing
-            for (int i = 0; i < 10; i++)
+            for (int i = 1; i < 10; i++)
             {
                 _articles.Add(new Article
                 {
@@ -32,6 +32,12 @@ namespace Shop.WebApi.DatabaseLayer
         {
             return _articles.Find(x => x.ID == id && x.IsSold != true && x.ArticlePrice <= maxPrice);
         }
+
+        public List<Article> GetArticles()
+        {
+            return _articles;
+        }
+
         public int Insert(Article article)
         {
             article.ID = _articles.Max(art => art.ID) + 1;

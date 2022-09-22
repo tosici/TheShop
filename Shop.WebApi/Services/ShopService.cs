@@ -1,35 +1,51 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Shop.WebApi.DatabaseLayer;
 using Shop.WebApi.Interfaces;
 using Shop.WebApi.Models;
+using System.Runtime.Intrinsics.Arm;
 
 namespace Shop.WebApi.Services
 {
     public class ShopService : IShopService
     {
         private readonly IShopRepository _shopRepository;
+        private readonly IOptions<List<Dealer>> _dealers;
         private IMemoryCache _cache;
-        public ShopService(IShopRepository shopRepository, IMemoryCache cache)
+        public ShopService(IShopRepository shopRepository, IMemoryCache cache, IOptions<List<Dealer>> dealers)
         {
             _shopRepository = shopRepository;
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _dealers = dealers;
         }
 
 
         public Article? GetArticle(int id, int maxPrice)
         {
-            if (_cache.TryGetValue($"Article_{id}", out Article? article) && article?.ArticlePrice < maxPrice)
+            if (_cache.TryGetValue($"Article_{id}", out Article? article) && article?.IsSold != true && article?.ArticlePrice < maxPrice)
             {
                 return article;
             }
             article = _shopRepository.GetByIdMaxPrice(id, maxPrice);
-            if (article == null)
-            {
-                article = FindArticleDealersMaxPrice(id, maxPrice);
-            }
+            article ??= FindArticleDealersMaxPrice(id, maxPrice);
             if (article != null)
             {
-                _cache.Set($"Article_{id}", article);
+                _cache.Set($"Article_{id}", article, TimeSpan.FromHours(2));
+            }
+            return article;
+        }
+
+        public Article? GetArticleById(int id)
+        {
+            if (_cache.TryGetValue($"Article_{id}", out Article? article))
+            {
+                return article;
+            }
+            article = _shopRepository.GetArticleById(id);
+            article ??= FindArticleDealersById(id);
+            if (article != null)
+            {
+                _cache.Set($"Article_{id}", article, TimeSpan.FromHours(2));
             }
             return article;
         }
@@ -37,7 +53,47 @@ namespace Shop.WebApi.Services
 
         public Article? FindArticleDealersMaxPrice(int id, int maxPrice)
         {
-            throw new NotImplementedException();
+            Article? article;
+            foreach (Dealer dealer in _dealers.Value)
+            {
+                IDealerService dealerService = DealerFactory.GetDealer(dealer);
+                if (dealerService.ArticleInInventory(id).Result)
+                {
+                    article = dealerService.GetArticle(id).Result;
+                    if (article.ArticlePrice < maxPrice)
+                    {
+                        article.DealerId = dealer.DealerId;
+                        _cache.Set($"Article_{id}", article, TimeSpan.FromHours(2));
+                        return article;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public Article? FindArticleDealersById(int id)
+        {
+            Article? article;
+            foreach (Dealer dealer in _dealers.Value)
+            {
+                IDealerService dealerService = DealerFactory.GetDealer(dealer);
+                if (dealerService.ArticleInInventory(id).Result)
+                {
+                    article = dealerService.GetArticle(id).Result;
+                    if (article != null)
+                    {
+                        article.DealerId = dealer.DealerId;
+                        _cache.Set($"Article_{id}", article, TimeSpan.FromHours(2));
+                        return article;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public List<Article> GetArticlesLocal()
+        {
+            return _shopRepository.GetArticles();
         }
 
         public Article BuyArticle(Article article, int buyerId)
@@ -45,13 +101,17 @@ namespace Shop.WebApi.Services
             article.IsSold = true;
             article.SoldDate = DateTime.Now;
             article.BuyerUserId = buyerId;
-            if (article.DealerId > 0)
+            if (!string.IsNullOrWhiteSpace(article.DealerId))
             {
-                return DealerFactory.GetDealer(article.DealerId).BuyArticle(article);
+                Article result = DealerFactory.GetDealer(_dealers.Value.Single(d => d.DealerId == article.DealerId)).BuyArticle(article).Result;
+                _cache.Remove($"Article_{result.ID}");
+                return result;
             }
             else
             {
-                return _shopRepository.Save(article);
+                _shopRepository.Save(article);
+                _cache.Remove($"Article_{article.ID}");
+                return article;
             }
         }
     }

@@ -22,6 +22,11 @@ namespace Shop.WebApi.Repository
             return _db.GetByIdMaxPrice(id, maxPrice);
         }
 
+        public List<Article> GetArticles()
+        {
+           return  _db.GetArticles();
+        }
+
         public Article Save(Article article)
         {
             if (article.ID == 0)

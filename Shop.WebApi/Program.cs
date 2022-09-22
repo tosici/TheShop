@@ -1,8 +1,11 @@
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Shop.WebApi.DatabaseLayer;
 using Shop.WebApi.Interfaces;
+using Shop.WebApi.Models;
 using Shop.WebApi.Repository;
 using Shop.WebApi.Services;
+using System.Runtime.Intrinsics.Arm;
 
 namespace Shop.WebApi
 {
@@ -19,6 +22,7 @@ namespace Shop.WebApi
             builder.Services.AddScoped<IShopRepository, ShopRepository>();
             builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
             builder.Services.AddSingleton<IDb, Db>();
+            builder.Services.Configure<List<Dealer>>(builder.Configuration.GetSection("Dealers"));
 
             var app = builder.Build();
 

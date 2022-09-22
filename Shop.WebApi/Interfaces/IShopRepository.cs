@@ -6,6 +6,7 @@ namespace Shop.WebApi.Interfaces
     {
         Article? GetArticleById(int id);
         Article? GetByIdMaxPrice(int id, int maxPrice);
+        List<Article> GetArticles();
         Article Save(Article article);
     }
 }
