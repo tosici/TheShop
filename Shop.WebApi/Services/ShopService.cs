@@ -22,7 +22,7 @@ namespace Shop.WebApi.Services
 
         public Article? GetArticle(int id, int maxPrice)
         {
-            if (_cache.TryGetValue($"Article_{id}", out Article? article) && article?.IsSold != true && article?.ArticlePrice < maxPrice)
+            if (_cache.TryGetValue($"Article_{id}", out Article? article) && article?.IsSold != true && article?.Price < maxPrice)
             {
                 return article;
             }
@@ -60,7 +60,7 @@ namespace Shop.WebApi.Services
                 if (dealerService.ArticleInInventory(id).Result)
                 {
                     article = dealerService.GetArticle(id).Result;
-                    if (article.ArticlePrice < maxPrice)
+                    if (article.Price < maxPrice)
                     {
                         article.DealerId = dealer.DealerId;
                         _cache.Set($"Article_{id}", article, TimeSpan.FromHours(2));
@@ -104,13 +104,13 @@ namespace Shop.WebApi.Services
             if (!string.IsNullOrWhiteSpace(article.DealerId))
             {
                 Article result = DealerFactory.GetDealer(_dealers.Value.Single(d => d.DealerId == article.DealerId)).BuyArticle(article).Result;
-                _cache.Remove($"Article_{result.ID}");
+                _cache.Remove($"Article_{result.Id}");
                 return result;
             }
             else
             {
                 _shopRepository.Save(article);
-                _cache.Remove($"Article_{article.ID}");
+                _cache.Remove($"Article_{article.Id}");
                 return article;
             }
         }

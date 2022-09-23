@@ -29,9 +29,9 @@ namespace Shop.WebApi.Repository
 
         public Article Save(Article article)
         {
-            if (article.ID == 0)
+            if (article.Id == 0)
             {
-                article.ID = _db.Insert(article);
+                article.Id = _db.Insert(article);
             }
             else
             {

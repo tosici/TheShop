@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Shop.WebApi.Controllers;
 
 namespace xUnitTests
@@ -8,8 +9,10 @@ namespace xUnitTests
     {
 
         #region members
-        ShopController _controller;
-        ShopServiceStub shopService;
+        readonly ShopController _controller;
+        readonly ShopServiceStub shopService;
+        readonly LoggerStub logger;
+        
         #endregion
 
         #region Ctors
@@ -18,7 +21,8 @@ namespace xUnitTests
             try
             {
                 shopService = new ShopServiceStub();
-                _controller = new ShopController(shopService);
+                logger = new LoggerStub();
+                _controller = new ShopController(shopService, logger);
             }
             catch (Exception ex)
             {
@@ -54,5 +58,21 @@ namespace xUnitTests
                 Assert.True(false, $"{ex.GetBaseException().Message}\r\n{ex.StackTrace}");
             }
         }
+
+        [Fact]
+        public void GetArticle_BadRequest()
+        {
+            try
+            {
+                var result = _controller.GetArticle(1);
+                Assert.IsType<BadRequestObjectResult>(result.Result);
+            }
+            catch (Exception ex)
+            {
+                Assert.True(false, $"{ex.GetBaseException().Message}\r\n{ex.StackTrace}");
+            }
+        }
+
+
     }
 }

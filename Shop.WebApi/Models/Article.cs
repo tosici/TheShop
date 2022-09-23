@@ -10,11 +10,11 @@ namespace Shop.WebApi.Models
         public Article()
         {
         }
-        public int ID { get; set; } = -1;
+        public int Id { get; set; }
 
-        public string Name_of_article { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
 
-        public int ArticlePrice { get; set; }
+        public int Price { get; set; }
         public bool IsSold { get; set; }
 
         public DateTime SoldDate { get; set; }

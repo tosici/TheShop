@@ -1,4 +1,5 @@
-﻿using Shop.WebApi.Interfaces;
+﻿using Microsoft.AspNetCore.Mvc;
+using Shop.WebApi.Interfaces;
 using Shop.WebApi.Models;
 using System;
 using System.Collections.Generic;
@@ -27,11 +28,15 @@ namespace xUnitTests
 
         public Article? GetArticle(int id, int maxPrice)
         {
-            if (id == 0)
+            switch (id)
             {
-                return null;
+                case 0:
+                    return null;
+                case 1:
+                    throw new HttpRequestException("Bad Request", null, System.Net.HttpStatusCode.BadRequest);
             }
-            return new Article { ID=3, Name_of_article="Test", ArticlePrice = 300};
+            return new Article { Id = 3, Name = "Test", Price = 300 };
+
         }
 
         public Article? GetArticleById(int id)

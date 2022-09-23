@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using Shop.WebApi.DatabaseLayer;
 using Shop.WebApi.Interfaces;
 using Shop.WebApi.Models;
@@ -23,6 +24,13 @@ namespace Shop.WebApi
             builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
             builder.Services.AddSingleton<IDb, Db>();
             builder.Services.Configure<List<Dealer>>(builder.Configuration.GetSection("Dealers"));
+
+            builder.Logging.ClearProviders();
+            var path = builder.Configuration.GetValue<string>("LogFilePath");
+            var logger = new LoggerConfiguration()
+                .WriteTo.File(path,rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+            builder.Logging.AddSerilog(logger);
 
             var app = builder.Build();
 

@@ -43,7 +43,7 @@ namespace Vendor.WebApi.Controllers
         [HttpPost("{buyerId}")]
         public ActionResult<Article> BuyArticle([FromBody]Article article, int buyerId)
         {
-            var id = article.ID;
+            var id = article.Id;
             if (article == null)
             {
                 return UnprocessableEntity();

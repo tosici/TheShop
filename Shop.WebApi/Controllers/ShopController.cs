@@ -12,10 +12,12 @@ namespace Shop.WebApi.Controllers
     public class ShopController : Controller
     {
         private readonly IShopService _shopService;
+        private readonly ILogger<ShopController> _logger;
 
-        public ShopController(IShopService shopService)
+        public ShopController(IShopService shopService, ILogger<ShopController> logger)
         {
             _shopService = shopService;
+            _logger = logger;
         }
 
         #region get
@@ -27,21 +29,20 @@ namespace Shop.WebApi.Controllers
             {
                 article = _shopService.GetArticle(id, maxExpectedPrice);
             }
-            catch (ValidationException v)
-            {
-                return BadRequest(v.Message);
-            }
             catch (UnauthorizedAccessException)
             {
+                _logger.LogError($"Authorization error when getting article {id}");
                 return Unauthorized();
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return BadRequest(ex.Message);
             }
             
             if (article == null)
             {
+                _logger.LogInformation($"Article {id} not found for price {maxExpectedPrice}");
                 return new EmptyResult();
             }
             else
@@ -58,16 +59,14 @@ namespace Shop.WebApi.Controllers
             {
                 article = _shopService.GetArticleById(id);
             }
-            catch (ValidationException v)
-            {
-                return BadRequest(v.Message);
-            }
             catch (UnauthorizedAccessException)
             {
+                _logger.LogError($"Authorization error when gettting article {id}");
                 return Unauthorized();
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return BadRequest(ex.Message);
             }
 
@@ -89,8 +88,9 @@ namespace Shop.WebApi.Controllers
             {
                 articles = _shopService.GetArticlesLocal();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return BadRequest();
             }
 
@@ -110,16 +110,14 @@ namespace Shop.WebApi.Controllers
             {
                 _shopService.BuyArticle(article, buyerId);
             }
-            catch (ValidationException v)
-            {
-                return BadRequest(v.Message);
-            }
             catch (UnauthorizedAccessException)
             {
+                _logger.LogError($"Authorization error when buying article {article.Id} from dealer {article.DealerId}");
                 return Unauthorized();
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return BadRequest(ex.Message);
             }
 

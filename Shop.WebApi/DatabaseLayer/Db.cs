@@ -16,21 +16,21 @@ namespace Shop.WebApi.DatabaseLayer
             {
                 _articles.Add(new Article
                 {
-                    ID = i,
-                    Name_of_article = $"Article {i}",
-                    ArticlePrice = new Random().Next(100, 500)
+                    Id = i,
+                    Name = $"Article {i}",
+                    Price = new Random().Next(100, 500)
                 });
             }
         }
 
         public Article? GetById(int id)
         {
-            return _articles.Find(x => x.ID == id);
+            return _articles.Find(x => x.Id == id);
         }
 
         public Article? GetByIdMaxPrice(int id, int maxPrice)
         {
-            return _articles.Find(x => x.ID == id && x.IsSold != true && x.ArticlePrice <= maxPrice);
+            return _articles.Find(x => x.Id == id && x.IsSold != true && x.Price <= maxPrice);
         }
 
         public List<Article> GetArticles()
@@ -40,13 +40,13 @@ namespace Shop.WebApi.DatabaseLayer
 
         public int Insert(Article article)
         {
-            article.ID = _articles.Max(art => art.ID) + 1;
+            article.Id = _articles.Max(art => art.Id) + 1;
             _articles.Add(article);
-            return article.ID;
+            return article.Id;
         }
         public void Update(Article article)
         {
-            int index = _articles.FindIndex(art => art.ID == article.ID);
+            int index = _articles.FindIndex(art => art.Id == article.Id);
             _articles[index] = article;
             
         }

@@ -42,8 +42,10 @@ namespace Shop.WebApi.Services
 
                     case HttpStatusCode.Unauthorized:
                         throw new UnauthorizedAccessException();
+
+                    default:
+                        throw new Exception(response.Result.StatusCode.ToString());
                 }
-                throw new Exception(response.Result.StatusCode.ToString());
             }
         }
 
@@ -73,8 +75,10 @@ namespace Shop.WebApi.Services
 
                     case HttpStatusCode.Unauthorized:
                         throw new UnauthorizedAccessException();
+
+                    default:
+                        throw new Exception(response.Result.StatusCode.ToString());
                 }
-                throw new Exception(response.Result.StatusCode.ToString());
 
             }
         }
@@ -104,8 +108,11 @@ namespace Shop.WebApi.Services
 
                     case HttpStatusCode.Unauthorized:
                         throw new UnauthorizedAccessException();
+
+                    default:
+                        throw new Exception(response.Result.StatusCode.ToString());
                 }
-                throw new Exception(response.Result.StatusCode.ToString());
+                
             }
         }
     }
